@@ -1,4 +1,18 @@
 def summarize_pages(pages):
+    if len(pages) == 0:
+        return{
+            "total":total,
+            "fail_count":fail_count,
+            "avg_score":avg_score,
+            "max_score_page":max_score_page
+            #极端情况会不会炸？：
+            #空列表怎么办？
+            # 空字符串怎么办？
+            # 文件不存在怎么办？
+            # API 返回空怎么办？
+            # 字典里缺一个 key 怎么办？
+        }
+
     total = 0
     fail_count = 0
     total_score = 0
