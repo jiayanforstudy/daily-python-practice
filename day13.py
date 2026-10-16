@@ -7,8 +7,17 @@ def analyze_document(pages):
     fail_pages = 0
     max_score = 0
     best_page = None
-
+    if not pages:
+        return  {
+                "total_score": 0,
+                "fail_pages": 0,
+                "best_page": 0,
+                "avg_score": None
+                
+            }
     for page in pages:
+        
+
         score = page["score"]
 
         total_score = total_score + score
@@ -23,16 +32,17 @@ def analyze_document(pages):
     result = {
         "total_score": total_score,
         "fail_pages": fail_pages,
-        "avg_score": avg_score,
-        "best_page": best_page
+        "best_page": best_page,
+        "avg_score": avg_score
+        
     }
     return result
 
-with open("sample.json","r",encoding="utf-8") as f:
+with open("sample copy.json","r",encoding="utf-8") as f:
     pages = json.load(f)
 
 result = analyze_document(pages)
 print(result)
 
-with open("result.json","w",encoding="utf-8") as f :
+with open("result copy.json","w",encoding="utf-8") as f :
     json.dump(result,f,ensure_ascii=False,indent=4)
