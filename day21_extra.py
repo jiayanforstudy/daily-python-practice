@@ -51,7 +51,10 @@ def analyze_pages(pages, threshold):
     }    
     return result
 
-result = analyze_pages(pages,0.4)
-print(result)
+# result = analyze_pages(pages,0.4)
+# print(result)
 
+if __name__ == "__main__":
+    result = analyze_pages(pages,0.4)
+    print(result)
 
