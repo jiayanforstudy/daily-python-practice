@@ -77,3 +77,68 @@ rag_chain.invoke("What is Task Decomposition?")
 继续在同一个 Notebook 中追踪 `retriever` 的返回值及其在 RAG 链中的传递过程。
 
 **下次不要重新学习整个 RAG 流程，直接从检索结果的数据结构开始。**
+
+---
+
+## Day25 — 2026-10-31
+
+### 1. 本次阅读范围
+
+继续阅读 `rag_from_scratch_1_to_4.ipynb`，重点理解 Retriever 返回的文档如何经过格式化和 Prompt 处理，最终进入 LLM。
+
+### 2. 核心代码
+
+```python
+def format_docs(docs):
+    return "\n\n".join(
+        doc.page_content for doc in docs
+    )
+
+template = """Answer the question based only on the following context:
+
+{context}
+
+Question: {question}
+"""
+
+prompt = ChatPromptTemplate.from_template(template)
+```
+
+### 3. 已掌握的知识
+
+- `Document`：LangChain 文档对象。
+- `page_content`：提取文档正文。
+- `metadata`：保存文档来源、页码等附加信息。
+- `format_docs()`：提取多个 Document 的正文并拼接。
+- `"\n\n".join()`：使用两个换行符连接多个字符串。
+- `retriever | format_docs`：先检索文档，再格式化检索结果。
+- `RunnablePassthrough()`：原样传递用户问题。
+- `ChatPromptTemplate.from_template()`：将字符串模板转换为 Prompt 模板对象。
+- `{context}`：检索到的上下文。
+- `{question}`：用户提出的问题。
+- `StrOutputParser()`：将模型输出解析为字符串。
+
+### 4. 已理解的数据流
+
+Question → Retriever → Document List → format_docs → Context
+
+原始问题通过 `RunnablePassthrough()` 保留。
+
+两路数据进入 Prompt 后，依次经过 LLM 和输出解析器，最终生成回答。
+
+### 5. 工程理解
+
+Prompt 可以要求模型仅根据检索上下文回答，但不能绝对避免幻觉。实际项目还需要考虑检索相关性判断、相似度阈值和拒答机制。
+
+### 6. 下次阅读起点
+
+继续阅读同一个 Notebook 中的 LLM 初始化和 Retriever 配置。
+
+重点关注：
+
+- `ChatOpenAI()` 的初始化参数
+- 模型名称与 temperature 参数
+- Retriever 的检索数量和搜索策略
+- 检索结果是否包含相似度分数
+
+**当前进度：已经理解 RAG 从文档加载、切分、向量化、检索到 Prompt 和 LLM 生成的基本流程。**
