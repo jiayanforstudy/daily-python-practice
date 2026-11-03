@@ -142,3 +142,166 @@ Prompt 可以要求模型仅根据检索上下文回答，但不能绝对避免�
 - 检索结果是否包含相似度分数
 
 **当前进度：已经理解 RAG 从文档加载、切分、向量化、检索到 Prompt 和 LLM 生成的基本流程。**
+
+---
+
+## Day28 — 2026-11-03
+
+### 1. 本次阅读范围
+
+项目：`langchain-ai/rag-from-scratch`
+
+Notebook：`rag_from_scratch_1_to_4.ipynb`
+
+本次重点：Retriever 配置、LLM 初始化、向量相似度检索及 Document 数据结构。
+
+### 2. 实际阅读的核心代码
+
+**（1）Retriever 配置**
+
+```python
+retriever = vectorstore.as_retriever(
+    search_kwargs={"k": 1}
+)
+```
+
+- `as_retriever()`：从向量存储创建检索器。
+- `search_kwargs`：传递检索参数。
+- `k`：控制返回的相关文档块数量。
+
+k 越大，检索范围越广，但可能引入不相关内容，增加上下文长度和模型处理成本。
+
+**（2）LLM 初始化**
+
+```python
+llm = ChatOpenAI(
+    model_name="gpt-3.5-turbo",
+    temperature=0
+)
+```
+
+- `ChatOpenAI()`：初始化聊天模型。
+- `model_name`：指定使用的模型。
+- `temperature`：控制生成随机性。较低的值通常使输出更稳定。
+
+注意：这里是原 Notebook 中的旧版模型配置示例，不代表该模型目前仍是最佳选择。
+
+**（3）检索调用**
+
+Notebook 使用了：
+
+```python
+docs = retriever.get_relevant_documents(
+    "What is Task Decomposition?"
+)
+```
+
+以及：
+
+```python
+len(docs)
+```
+
+其中：
+- `docs`：保存 Retriever 返回的 Document 对象列表。
+- `len(docs)`：统计返回的文档数量。
+
+新版 LangChain 通常使用：
+
+```python
+docs = retriever.invoke(question)
+```
+
+阅读旧项目时需要注意 API 版本差异。
+
+### 3. 额外学习：向量相似度检索
+
+文档向量化和问题向量化：
+
+- `embed_documents()`：将文档转换成向量。
+- `embed_query()`：将用户问题转换成向量。
+
+随后向量数据库根据向量之间的关系寻找相关文档。
+
+常见的向量比较方法：
+
+- Cosine Similarity：余弦相似度。
+- Euclidean Distance：欧氏距离。
+- Dot Product：点积。
+
+余弦相似度公式：
+
+cos(θ) = (A · B) / (||A|| × ||B||)
+
+注意：
+- 相似度通常越大越相关。
+- 距离通常越小越接近。
+- Chroma 的 `similarity_search_with_score()` 返回距离分数，不能直接将其当作百分比相似度。
+
+### 4. 额外学习：如何查看检索结果
+
+```python
+results = vectorstore.similarity_search_with_score(
+    "What is Task Decomposition?",
+    k=3
+)
+
+for doc, score in results:
+    print("Distance:", score)
+    print("Content:", doc.page_content)
+    print("Metadata:", doc.metadata)
+```
+
+这里的返回结果由 Document 和对应的距离分数组成。
+
+Document 对象的重要字段：
+
+| 字段 | 作用 |
+|---|---|
+| `page_content` | 文档正文 |
+| `metadata` | 文档来源、页码等附加信息 |
+
+常见访问方式：
+
+```python
+docs[0]
+docs[0].page_content
+docs[0].metadata
+```
+
+注意：以上是额外设计的检查代码，并非原 Notebook 中实际存在的代码。
+
+### 5. 已理解的核心知识
+
+- Retriever 的 k 参数控制返回文档数量。
+- 增大 k 不代表检索质量一定提高。
+- 用户问题也需要转换成 Embedding，才能进行向量检索。
+- 向量数据库根据向量距离或相似度寻找相关文档。
+- Document 不只有正文，还包含 metadata。
+- metadata 可以用于追踪文档来源、页码及其他信息。
+- 检索阶段的质量会直接影响 RAG 最终生成的回答。
+
+### 6. 本次理解测试
+
+进阶测试 3/3 全部正确：
+
+1. 用户问题需要转换成 Embedding 后才能进行向量检索。
+2. Chroma 距离值通常越小，表示向量越接近。
+3. metadata 用于保存来源、页码等附加信息。
+
+### 7. 下次阅读起点
+
+进入：
+
+`rag_from_scratch_5_to_9.ipynb`
+
+开始学习进阶 RAG 检索技术：
+
+- Multi-Query Retrieval
+- RAG-Fusion
+- Query Decomposition
+- HyDE
+
+重点理解基础向量检索存在什么局限，以及不同检索优化方法分别解决什么问题。
+
+**当前进度：已经掌握基础 RAG 的文档处理、向量存储、检索、Prompt 组织、LLM 生成及基本检索配置。**
